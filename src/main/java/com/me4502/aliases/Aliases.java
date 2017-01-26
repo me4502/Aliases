@@ -3,7 +3,6 @@ package com.me4502.aliases;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
-import com.me4502.aliases.command.ReloadCommand;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -12,11 +11,11 @@ import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.command.SendCommandEvent;
 import org.spongepowered.api.event.filter.cause.First;
+import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
@@ -51,18 +50,15 @@ public class Aliases {
 
     @Listener
     public void onServerStart(GameStartedServerEvent event) {
-
         loadAliases();
-
-        CommandSpec reloadCommand = CommandSpec.builder().permission("aliases.reload")
-                .executor(new ReloadCommand(this)).build();
-
-        CommandSpec aliasCommand = CommandSpec.builder().child(reloadCommand, "reload").build();
-
-        Sponge.getGame().getCommandManager().register(this, aliasCommand, "aliases", "alias");
     }
 
-    public void loadAliases() {
+    @Listener
+    public void onServerReload(GameReloadEvent event) {
+        loadAliases();
+    }
+
+    private void loadAliases() {
         aliases.clear();
 
         try {
